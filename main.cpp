@@ -7,25 +7,25 @@
 
 class Monitor {
 private:
-    std::mutex mtx;                      // Мьютекс для синхронизации
-    std::condition_variable cv;          // Условная переменная
-    std::queue<int> messageQueue;        // Очередь для хранения сообщений
+    std::mutex mtx;                    
+    std::condition_variable cv;        
+    std::queue<int> messageQueue;       
 
 public:
     void sendMessage(int message) {
         std::unique_lock<std::mutex> lock(mtx);
-        messageQueue.push(message);      // Добавляем сообщение в очередь
+        messageQueue.push(message);      
         std::cout << "Message sent: " << message << "\n";
-        cv.notify_one();                 // Уведомляем поток-потребитель
+        cv.notify_one();                
     }
 
     void receiveMessage() {
         std::unique_lock<std::mutex> lock(mtx);
 
-        cv.wait(lock, [this]() { return !messageQueue.empty(); }); // Ожидание, пока очередь не станет непустой
+        cv.wait(lock, [this]() { return !messageQueue.empty(); }); 
 
-        int message = messageQueue.front(); // Извлекаем сообщение из очереди
-        messageQueue.pop();                 // Удаляем сообщение из очереди
+        int message = messageQueue.front(); 
+        messageQueue.pop();                
 
         std::cout << "Message received: " << message << "\n";
     }
@@ -36,14 +36,14 @@ int main() {
 
     std::thread producer([&monitor]() {
         for (int i = 1; i <= 5; ++i) {
-            monitor.sendMessage(i); // Отправляем сообщение
-            std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Имитация задержки
+            monitor.sendMessage(i); 
+            std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
         }
     });
 
     std::thread consumer([&monitor]() {
         for (int i = 1; i <= 5; ++i) {
-            monitor.receiveMessage(); // Получаем сообщение
+            monitor.receiveMessage();
         }
     });
 
